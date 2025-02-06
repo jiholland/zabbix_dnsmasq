@@ -1,7 +1,6 @@
 zabbix_export:
-  version: '6.0'
-  date: '2024-01-24T09:21:07Z'
-  groups:
+  version: '7.0'
+  template_groups:
     - uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
       name: Templates/Applications
   templates:
@@ -18,31 +17,31 @@ zabbix_export:
         - uuid: 3486da6e3571436c8390a4bbb8071b45
           name: 'dnsmasq: dhcp leases'
           key: 'dhcp.leases[{$DNSMASQ.DHCP.FILE}]'
-          history: 30d
           description: 'Get number of dhcp leases from dnsmasq.'
           preprocessing:
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1d
           tags:
-            - tag: Application
+            - tag: application
               value: dnsmasq
         - uuid: 1a9f83f76d26496694d0696b4162c7f5
           name: 'dnsmasq: dhcp max'
           key: 'dhcp.max[{$DNSMASQ.CONFIG.FILE}]'
-          history: 30d
+          delay: 12h
+          trends: '0'
           description: 'Maximum number of dhcp leases.'
           preprocessing:
             - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 1d
           tags:
-            - tag: Application
+            - tag: application
               value: dnsmasq
         - uuid: df4e70d2f1a8413a8dee22f798a3e591
           name: 'dnsmasq: status'
           key: 'proc.num[dnsmasq]'
-          history: 30d
+          trends: '0'
           description: 'Status of dnsmasq service.'
           valuemap:
             name: 'dnsmasq status'
@@ -51,7 +50,7 @@ zabbix_export:
               parameters:
                 - 1d
           tags:
-            - tag: Application
+            - tag: application
               value: dnsmasq
           triggers:
             - uuid: 1332075f5fc1454f858fb0fbd86a617c
@@ -63,7 +62,9 @@ zabbix_export:
                 - tag: scope
                   value: availability
       tags:
-        - tag: Application
+        - tag: class
+          value: application
+        - tag: target
           value: dnsmasq
       macros:
         - macro: '{$DNSMASQ.CONFIG.FILE}'
@@ -91,9 +92,7 @@ zabbix_export:
       description: 'dnsmasq dhcp scope usage is above {$DNSMASQ.DHCP.CRIT}'
       tags:
         - tag: scope
-          value: availability
-        - tag: scope
-          value: dhcp
+          value: notice
     - uuid: cfeb66a3e4764486855ef94191e00859
       expression: 'last(/dnsmasq by Zabbix agent/dhcp.leases[{$DNSMASQ.DHCP.FILE}])>=last(/dnsmasq by Zabbix agent/dhcp.max[{$DNSMASQ.CONFIG.FILE}])'
       name: 'dnsmasq: dhcp scope is full'
@@ -102,8 +101,6 @@ zabbix_export:
       tags:
         - tag: scope
           value: availability
-        - tag: scope
-          value: dhcp
   graphs:
     - uuid: 8caa1d8613eb494bbb423090f5def42c
       name: 'dnsmasq dhcp leases'
